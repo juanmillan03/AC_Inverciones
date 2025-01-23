@@ -73,7 +73,7 @@ void contarEstados(const vector<vector<int>>& grid, int L, int& count0, int& cou
 // Función para guardar la matriz completa en el archivo cada 10 pasos de tiempo
 void guardarMatrizCada10Iteraciones(const vector<vector<int>>& grid, int L, int iteracion, const string& nombreArchivo) {
     // Solo guardar en iteraciones múltiplos de 10
-    if (iteracion % 1 == 0) {
+    if (iteracion % 10 == 0) {
         ofstream archivo(nombreArchivo, ios::app);
         if (!archivo) {
             cerr << "Error al abrir el archivo " << nombreArchivo << endl;
@@ -93,40 +93,40 @@ void guardarMatrizCada10Iteraciones(const vector<vector<int>>& grid, int L, int 
 
 
 
-int main() {
-    srand(time(0)); // Semilla para números aleatorios
+int main(int argc, char* argv[] ) {
 
-    int L = 10; // Tamaño del grid
-    float probEvaluacion = 0.1; // Probabilidad de evaluación
-    float probRegreso = 0.55;    // Probabilidad de regreso
+    int L = atoi(argv[1]);  
+    float probEvaluacion = atof(argv[2]); 
+    float probRegreso = atof(argv[3]);   
+    srand(time(0)); // Semilla para números aleatorios
+    
     vector<vector<int>> grid(L, vector<int>(L, ACTIVO_RIESGO));
-    string nombreArchivo = "resultado.txt";
+    string nombreArchivo = "datos_matrix.txt";
+    string nombreArchivo_1= "datos_t_inter.txt";
 
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
             grid[i][j] = (i==L/2 && j==L/2) ? 2 : 0; // Estados 0, 1 o 2
         }
     }
-    
-    
-    
     ofstream archivo(nombreArchivo);
     archivo.close();
 
-
-  
+    ofstream archivo1(nombreArchivo_1, ios::app);
 
     // Variables para contar los estados
-    int count0, count1, count2;;
-    // Ejecutar la simulación por varias iteraciones
+    int count0, count1, count2;
+    int t_inter=0;
     int iteraciones = 100;
     for (int t = 0; t <= iteraciones; ++t) {
         contarEstados(grid, L, count0, count1, count2);
         guardarMatrizCada10Iteraciones(grid, L, t, nombreArchivo); // Guardar matriz cada 10 iteraciones
-        cout << count0 << " " << count1 << " " << count2 << endl;
+        if(count2<=count0)t_inter=t;
+        // cout << count0 << " " << count1 << " " << count2 << endl;
         actualizarGrid(grid, L, probEvaluacion, probRegreso);
-
     }
+    archivo1<< L <<" "<<probEvaluacion<<" "<<probRegreso<<" "<<t_inter<<endl;
+    archivo1.close();
 
     return 0;
 }
