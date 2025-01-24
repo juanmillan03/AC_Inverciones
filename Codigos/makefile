@@ -3,3 +3,8 @@ copile:
 
 run: main
 	./main $(arg) $(arg1) $(arg2) > datos.txt
+clean:
+	rm datos_t_inter.txt
+for: copile
+	chmod +x bucle.sh
+	bash bucle.sh
