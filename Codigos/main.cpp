@@ -13,38 +13,21 @@ enum Estado {
     SIN_RIESGO = 2       // 2: Sin activos riesgosos
 };
 
-#include <cstdlib> // Para rand() y srand()
-#include <ctime>   // Para time()
-
-// Función para contar vecinos en un estado específico con vecindad de Small-World
-int contarVecinos(const vector<vector<int>>& grid, int x, int y, int estado, int L, double probLongRange) {
+// Función para obtener el número de vecinos en un estado específico
+int contarVecinos(const vector<vector<int>>& grid, int x, int y, int estado, int L) {
     int cuenta = 0;
-
-    // Vecindad de Moore de radio 1
     int dx[] = {-1, -1, -1, 0, 0, 1, 1, 1};
     int dy[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    // Recorrer los vecinos locales
     for (int k = 0; k < 8; ++k) {
-        // Coordenadas locales periódicas
-        int nx = (x + dx[k] + L) % L;
-        int ny = (y + dy[k] + L) % L;
-        if(dx[k]!=0 && dy[k]!=0)continue;// para que sea Moore la neuman
-        if ((double)rand() / RAND_MAX < probLongRange) {
-            // Elegir una celda aleatoria en el grid como vecino de larga distancia
-            int randomX = rand() % L;
-            int randomY = rand() % L;
-            // Contar si el vecino de larga distancia está en el estado deseado
-            if (grid[randomX][randomY] == estado) {
-                ++cuenta;
-            }
+        int nx = x + dx[k];
+        int ny = y + dy[k];
+        if (nx >= 0 && nx < L && ny >= 0 && ny < L && grid[nx][ny] == estado) {
+            ++cuenta;
         }
     }
-
     return cuenta;
 }
-
-
 
 // Simulación de una iteración del autómata celular
 void actualizarGrid(vector<vector<int>>& grid, int L, float probEvaluacion, float probRegreso) {
@@ -53,9 +36,9 @@ void actualizarGrid(vector<vector<int>>& grid, int L, float probEvaluacion, floa
     // Iterar por cada celda
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
-            int vecinosActivos = contarVecinos(grid, i, j, ACTIVO_RIESGO, L,0.75);
-            int vecinosSinRiesgo = contarVecinos(grid, i, j, SIN_RIESGO, L,0.75);
-            int vecinosEvaluando = contarVecinos(grid, i, j, EVALUACION, L,0.75);
+            int vecinosActivos = contarVecinos(grid, i, j, ACTIVO_RIESGO, L);
+            int vecinosSinRiesgo = contarVecinos(grid, i, j, SIN_RIESGO, L);
+            int vecinosEvaluando = contarVecinos(grid, i, j, EVALUACION, L);
             // Aplicar las reglas de transición
             if (grid[i][j] == ACTIVO_RIESGO && vecinosSinRiesgo == 0 && vecinosEvaluando == 0) {
                 nuevoGrid[i][j] = ACTIVO_RIESGO; // Regla 1
@@ -63,7 +46,7 @@ void actualizarGrid(vector<vector<int>>& grid, int L, float probEvaluacion, floa
                 nuevoGrid[i][j] = EVALUACION; // Regla 2
             } else if (grid[i][j] == EVALUACION && (float(rand()) / RAND_MAX) <= probEvaluacion) {
                 nuevoGrid[i][j] = SIN_RIESGO; // Regla 3
-            }  else if (grid[i][j] == SIN_RIESGO && vecinosActivos >= vecinosSinRiesgo && (float(rand()) / RAND_MAX) <= probRegreso) {
+            } else if (grid[i][j] == SIN_RIESGO && vecinosActivos >= vecinosSinRiesgo && (float(rand()) / RAND_MAX) <= probRegreso) {
                 nuevoGrid[i][j] = ACTIVO_RIESGO; // Regla 4
             } else if (grid[i][j] == SIN_RIESGO && vecinosActivos < vecinosSinRiesgo && (float(rand()) / RAND_MAX) > probRegreso) {
                 nuevoGrid[i][j] = SIN_RIESGO; // Regla 5
@@ -119,7 +102,7 @@ int main(int argc, char* argv[] ) {
     
     vector<vector<int>> grid(L, vector<int>(L, ACTIVO_RIESGO));
     string nombreArchivo = "datos_matrix.txt";
-    string nombreArchivo_1= "datos_t_inter_Moore1_SW075.txt";
+    string nombreArchivo_1= "datos_t_inter.txt";
 
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
@@ -134,16 +117,11 @@ int main(int argc, char* argv[] ) {
     // Variables para contar los estados
     int count0, count1, count2;
     int t_inter=0;
-    int t_inter_duda=0;
-    int intersecciones=0;
     int iteraciones = 100;
-    for (int t = 0; t <= iteraciones; t++) {
+    for (int t = 0; t <= iteraciones; ++t) {
         contarEstados(grid, L, count0, count1, count2);
         guardarMatrizCada10Iteraciones(grid, L, t, nombreArchivo); // Guardar matriz cada 10 iteraciones
-        if(count2<=count0){
-            if(t_inter==t)intersecciones++;
-            t_inter=t;
-        }    
+        if(count2<=count0)t_inter=t;
         // cout << count0 << " " << count1 << " " << count2 << endl;
         actualizarGrid(grid, L, probEvaluacion, probRegreso);
     }
