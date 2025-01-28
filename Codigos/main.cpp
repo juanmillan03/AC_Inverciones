@@ -16,18 +16,30 @@ enum Estado {
 // Función para obtener el número de vecinos en un estado específico
 int contarVecinos(const vector<vector<int>>& grid, int x, int y, int estado, int L) {
     int cuenta = 0;
-    int dx[] = {-1, -1, -1, 0, 0, 1, 1, 1};
-    int dy[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    for (int k = 0; k < 8; ++k) {
-        int nx = x + dx[k];
-        int ny = y + dy[k];
-        if (nx >= 0 && nx < L && ny >= 0 && ny < L && grid[nx][ny] == estado) {
-            ++cuenta;
+    // Recorrer el vecindario de radio 2 (distancia de Manhattan <= 2)
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            // Calcular la distancia de Manhattan
+            // if (abs(dx) + abs(dy) > 3) continue;
+
+            // Saltar la celda central
+            if (dx == 0 && dy == 0) continue;
+
+            // Coordenadas periódicas
+            int nx = (x + dx + L) % L; // Coordenada X periódica
+            int ny = (y + dy + L) % L; // Coordenada Y periódica
+
+            // Contar si el vecino está en el estado deseado
+            if (grid[nx][ny] == estado) {
+                ++cuenta;
+            }
         }
     }
+
     return cuenta;
 }
+
 
 // Simulación de una iteración del autómata celular
 void actualizarGrid(vector<vector<int>>& grid, int L, float probEvaluacion, float probRegreso) {
@@ -102,7 +114,7 @@ int main(int argc, char* argv[] ) {
     
     vector<vector<int>> grid(L, vector<int>(L, ACTIVO_RIESGO));
     string nombreArchivo = "datos_matrix.txt";
-    string nombreArchivo_1= "datos_t_inter.txt";
+    string nombreArchivo_1= "datos_t_inter_Moore1.txt";
 
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
@@ -117,10 +129,10 @@ int main(int argc, char* argv[] ) {
     // Variables para contar los estados
     int count0, count1, count2;
     int t_inter=0;
-    int iteraciones = 100;
+    int iteraciones = 1000;
     for (int t = 0; t <= iteraciones; ++t) {
         contarEstados(grid, L, count0, count1, count2);
-        guardarMatrizCada10Iteraciones(grid, L, t, nombreArchivo); // Guardar matriz cada 10 iteraciones
+        // guardarMatrizCada10Iteraciones(grid, L, t, nombreArchivo); // Guardar matriz cada 10 iteraciones
         if(count2<=count0)t_inter=t;
         // cout << count0 << " " << count1 << " " << count2 << endl;
         actualizarGrid(grid, L, probEvaluacion, probRegreso);
