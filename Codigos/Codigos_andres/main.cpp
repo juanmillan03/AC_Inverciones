@@ -118,16 +118,21 @@ int main(int argc, char* argv[] ) {
     int count0, count1, count2;
     int t_inter=0;
     int iteraciones = 1000;
+    int t_collapse = iteraciones;
+    bool collapsed = false;
     for (int t = 0; t <= iteraciones; ++t) {
         contarEstados(grid, L, count0, count1, count2 );
         guardarMatrizCada10Iteraciones(grid, L, t, nombreArchivo); // Guardar matriz cada 10 iteraciones
-        if(count2<=count0)t_inter=t;                               // Guardar el tiempo en el que el estado 0 supera el estado 2
+        if(count2<=count0)t_inter=t;  
+        if(count0 == 0 && collapsed == false){
+            t_collapse = t;
+            collapsed =  true;}                            // Guardar el tiempo en el que el estado 0 supera el estado 2 y en el que el estado 2 cae a 0 
         archivo2 << count0 << " " << count1 << " " << count2 << endl;
         actualizarGrid(grid, L, probEvaluacion, probRegreso);
     }
     archivo2.close();
     ofstream archivo1(nombreArchivo_1, ios::app);
-    archivo1<< L <<" "<<probEvaluacion<<" "<<probRegreso<<" "<<t_inter<<endl;
+    archivo1<< L <<" "<<probEvaluacion<<" "<<probRegreso<<" "<<t_inter<<" "<<t_collapse<<endl;
     archivo1.close();
 
     return 0;
