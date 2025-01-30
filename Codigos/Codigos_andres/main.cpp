@@ -117,7 +117,7 @@ int main(int argc, char* argv[] ) {
     // Variables para contar los estados
     int count0, count1, count2;
     int t_inter=0;
-    int iteraciones = 1000;
+    int iteraciones = 2000;
     int t_collapse = iteraciones;
     bool collapsed = false;
     for (int t = 0; t <= iteraciones; ++t) {
