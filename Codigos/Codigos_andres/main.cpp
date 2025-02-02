@@ -20,8 +20,9 @@ int contarVecinos(const vector<vector<int>>& grid, int x, int y, int estado, int
     int dy[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
     for (int k = 0; k < 8; ++k) {
-        int nx = x + dx[k];
-        int ny = y + dy[k];
+        int nx = x + dx[k];//            int nx = (x + dx + L) % L; // Coordenada X periódica
+        int ny = y + dy[k];//            int ny = (y + dy + L) % L; // Coordenada Y periódica
+
         if (nx >= 0 && nx < L && ny >= 0 && ny < L && grid[nx][ny] == estado) {
             ++cuenta;
         }
